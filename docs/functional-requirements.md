@@ -27,3 +27,49 @@ The Asset Registry is the “single source of truth” for every piece of equipm
 | Disposal Date               | Date asset was retired/disposed                                   | Date        | No       | Blank until disposed                               |
 | Disposal Method             | Sale, scrap, trade-in, donation                                   | Enum        | No       | Free list                                          |
 
+## 2. Maintenance Management
+
+This module handles Preventive, Predictive, and Reactive maintenance through Work Orders.
+
+### 2.1 Work Order Fields
+
+| Field Name             | Description                                                           | Data Type   | Required | Validation/Notes                                        |
+| ---------------------- | --------------------------------------------------------------------- | ----------- | -------- | ------------------------------------------------------- |
+| WO Number              | System-generated unique identifier                                    | String      | Yes      | Auto-generated (e.g. WO-20250503-0001)                  |
+| Asset Code             | Link to the Asset Registry                                             | String      | Yes      | Must match an existing Asset Code                       |
+| WO Type                | Preventive / Predictive / Reactive                                    | Enum        | Yes      | Dropdown                                               |
+| Request Date           | Date the work order was raised                                        | Date        | Yes      | ≤ today                                                 |
+| Scheduled Date         | Planned execution date                                                | Date        | Conditional | Must be ≥ Request Date (for Preventive)                 |
+| Completion Date        | Actual completion date                                                | Date        | No       | ≥ Scheduled Date                                        |
+| Priority               | Low / Medium / High / Critical                                        | Enum        | Yes      | Dropdown                                               |
+| Description            | Detailed description of the maintenance task                           | Text        | Yes      |                                                       |
+| Reported By            | User who raised the work order                                        | String      | Yes      | System user lookup                                     |
+| Assigned To            | Technician or crew assigned                                           | String      | Yes      | Lookup from Technicians table                          |
+| Estimated Hours        | Estimated labor hours                                                  | Decimal     | No       |                                                       |
+| Actual Hours           | Actual labor hours spent                                              | Decimal     | No       |                                                       |
+| Parts Required         | List of parts / materials                                              | Text        | No       | Can link to Parts Inventory                            |
+| Status                 | Open / Scheduled / In Progress / Completed / Closed                   | Enum        | Yes      | Tracks WO lifecycle                                    |
+| Verified By            | User who inspected & confirmed completion                              | String      | Conditional | Required when Status = Closed                           |
+| Comments               | Free-text notes                                                        | Text        | No       |                                                       |
+
+### 2.2 Preventive Scheduling
+
+- **Trigger Types**:  
+  - **Time-based** (e.g., every 500 hours or every 6 months)  
+  - **Usage-based** (e.g., per odometer reading or machine hours)  
+- **Schedule Definition**:  
+  - Define on Asset record: `<Trigger Type>`, `<Interval Value>`, `<Interval Unit>`.  
+  - System to auto-generate WOs when trigger threshold is reached.
+
+### 2.3 Reactive Maintenance
+
+- When a breakdown or issue is reported, a **Reactive** WO is created.  
+- Must capture **Failure Code** and **Root Cause** (after closing).
+
+### 2.4 Approvals & Notifications
+
+- **Approval Flow**:  
+  - If Estimated Hours > 8 or Priority = Critical → require Manager approval.  
+- **Notifications**:  
+  - Email/SMS to assigned technician on WO assignment.  
+  - Reminder 24 hrs before Scheduled Date for Preventive WOs.
