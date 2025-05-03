@@ -73,3 +73,41 @@ This module handles Preventive, Predictive, and Reactive maintenance through Wor
 - **Notifications**:  
   - Email/SMS to assigned technician on WO assignment.  
   - Reminder 24 hrs before Scheduled Date for Preventive WOs.
+## 3. Parts & Inventory
+
+This module manages spare parts, stock levels, and replenishment for all assets.
+
+| Field Name           | Description                                                      | Data Type   | Required | Validation/Notes                                     |
+| -------------------- | ---------------------------------------------------------------- | ----------- | -------- | ---------------------------------------------------- |
+| Part ID              | Unique identifier                                                | String      | Yes      | Auto-generated or SKU                                |
+| Part Name            | Descriptive name                                                 | String      | Yes      |                                                      |
+| Part Category        | Category (e.g. Filters, Brakes, Hydraulics)                     | Enum        | Yes      | Dropdown                                              |
+| Asset Type Code      | Link to compatible Asset Family/Category                          | String      | Yes      | Must match an existing Asset Type Code               |
+| Vendor Reference     | Preferred supplier reference                                     | String      | No       | Lookup from Vendor master                            |
+| Unit of Measure      | e.g. Piece, Litre, Kit                                          | Enum        | Yes      | Dropdown                                              |
+| Location Code        | Warehouse or bin location                                        | String      | No       | Lookup from Location master                           |
+| Current Stock        | On‐hand quantity                                                 | Integer     | Yes      | ≥ 0                                                   |
+| Min Level            | Minimum reorder threshold                                        | Integer     | Yes      | ≥ 0                                                   |
+| Max Level            | Maximum stock level                                              | Integer     | Yes      | ≥ Min Level                                           |
+| Reorder Point        | Quantity at which system triggers a reorder                      | Integer     | Yes      | ≤ Max Level                                           |
+| Reorder Quantity     | Default quantity to order                                        | Integer     | Yes      |                                                      |
+| Lead Time (Days)     | Supplier lead time                                               | Integer     | No       |                                                      |
+| Last Received Date   | Date of last delivery                                            | Date        | No       | ≤ today                                               |
+| Warranty Terms       | Warranty coverage for the part                                   | String      | No       | Free text                                             |
+| Remarks              | Additional notes                                                 | Text        | No       |                                                      |
+
+### 3.1 Replenishment Rules
+
+- Automatically generate **Purchase Requisitions** when `Current Stock ≤ Reorder Point`.  
+- Respect `Min Level`/`Max Level` when calculating order quantity (e.g. order up to Max Level).
+
+### 3.2 Stock Adjustments & Audits
+
+- **Adjustments**: manual positive/negative adjustments with reason codes (theft, damage, overage).  
+- **Audits**: periodic cycle counts by Location Code with variance reporting.
+
+### 3.3 Notifications & Approvals
+
+- **Notifications**: email to inventory manager when stock hits Reorder Point.  
+- **Approval**: if `Reorder Quantity × Unit Cost > USD X,XXX`, require Manager approval.
+
